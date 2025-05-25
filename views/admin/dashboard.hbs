@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard</title>
+    <link rel="stylesheet" href="/dashboard.css"> 
+</head>
+<body>
+    
+    <div class="dashboard-wrapper">
+        
+        <div class="sidebar">
+            <h2>Admin Dashboard</h2>
+            <a href="/dashboard">Dashboard</a>
+            <a href="/admin/logout" class="logout-btn">Logout</a>
+        </div>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <header>
+                <h1>User Management</h1>
+            </header>
+
+            <!-- Add User Button -->
+            <button class="add-user-btn" onclick="openAddUserModal()">Add User</button>
+
+            <!-- Table to Display Users -->
+            <div class="table-container">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Username</th> 
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {{#each users}} 
+                        <tr>
+                            <td>{{@index}}</td>
+                            <td>{{this.username}}</td> 
+                            <td>
+                                <button class="edit-btn" onclick="openEditUserModal('{{this._id}}', '{{this.username}}')">Edit</button>
+                                <button class="delete-btn" onclick="deleteUser('{{this._id}}')">Delete</button>
+                            </td>
+                        </tr>
+                        {{/each}}
+                    </tbody>
+                </table>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Add User Modal -->
+    <div class="modal" id="addUserModal">
+        <div class="modal-content">
+            <h2>Add User</h2>
+            <form id="addUserForm" method="POST" action="/admin/add-user">
+                <label for="username">Username:</label>
+                <input type="text" id="username" name="username" required>
+
+                <label for="password">Password:</label>
+                <input type="password" id="password" name="password" required>
+
+                <button type="submit">Add User</button>
+            </form>
+            <button onclick="closeAddUserModal()">Cancel</button>
+        </div>
+    </div>
+
+    <!-- Edit User Modal -->
+    <div class="modal" id="editUserModal">
+        <div class="modal-content">
+            <h2>Edit User</h2>
+            <form id="editUserForm" method="POST" action="/admin/edit-user">
+                <input type="hidden" id="editUserId" name="userId">
+                <label for="editUsername">Username:</label>
+                <input type="text" id="editUsername" name="username" required>
+
+                <label for="editPassword">New Password:</label>
+                <input type="password" id="editPassword" name="password" required>
+
+                <button type="submit">Save Changes</button>
+            </form>
+            <button onclick="closeEditUserModal()">Close</button>
+        </div>
+    </div>
+
+    <script>
+        // Modal Handling
+        function openAddUserModal() {
+            document.getElementById('addUserModal').style.display = 'flex';
+        }
+
+        function closeAddUserModal() {
+            document.getElementById('addUserModal').style.display = 'none';
+        }
+
+        function openEditUserModal(userId, username) {
+            document.getElementById('editUserId').value = userId;
+    
+            document.getElementById('editUsername').value = username;
+            document.getElementById('editUserModal').style.display = 'flex';
+        }
+
+        function closeEditUserModal() {
+            document.getElementById('editUserModal').style.display = 'none';
+        }
+
+        // Delete User Function
+        function deleteUser(userId) {
+    if (confirm("Are you sure you want to delete this user?")) {
+        fetch(`/admin/delete-user`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },body:JSON.stringify({userId})
+        })
+            .then((response) => {
+                if (!response.ok) {
+                    console.log(`HTTP error! Status: ${response.status}`);
+                }
+                return response.json();
+            })
+            .then((data) => {
+                if (data.success) {
+                    alert("User deleted successfully.");
+                    location.reload(); 
+                } else {
+                    alert("Failed to delete the user.");
+                }
+            })
+            .catch((error) => {
+                console.error("Error:", error);
+                alert("An error occurred. Please try again.");
+            });
+    }
+}
+
+    </script>
+</body>
+</html>
