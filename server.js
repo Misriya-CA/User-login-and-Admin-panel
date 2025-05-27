@@ -16,8 +16,17 @@ app.use(session({
     secret: 'your-secret-key',
     resave: false, 
     saveUninitialized: true, 
+     cookie: {
+        maxAge: 1000 * 60 * 60, // 1 hour
+    }
     
 }));
+
+app.use((req, res, next) => {
+    res.set('Cache-Control', 'no-store');
+    next();
+});
+
 
 // Parse incoming request bodies
 app.use(express.urlencoded({ extended: true }));
